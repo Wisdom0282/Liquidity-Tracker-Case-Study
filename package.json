@@ -1,0 +1,23 @@
+{
+  "name": "liquidity-tracker-case-study",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vite"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Wisdom0282/Liquidity-Tracker-Case-Study.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Wisdom0282/Liquidity-Tracker-Case-Study/issues"
+  },
+  "homepage": "https://github.com/Wisdom0282/Liquidity-Tracker-Case-Study#readme",
+  "devDependencies": {
+    "vite": "^7.3.1"
+  }
+}
