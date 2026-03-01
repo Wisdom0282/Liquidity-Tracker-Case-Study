@@ -1,0 +1,1301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UX Case Study — Global Liquidity & Payouts Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #141210;
+    --ink2: #3a3530;
+    --muted: #7a7268;
+    --muted2: #b0a89e;
+    --bg: #faf8f5;
+    --surface: #ffffff;
+    --border: #e8e2da;
+    --border2: #d4cdc4;
+    --accent: #c0392b;
+    --accent-warm: #b7651a;
+    --accent-green: #1a6645;
+    --accent-blue: #1a3f6e;
+    --tag-bg: #f0ece6;
+    --col: 720px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ─── PROGRESS BAR ─── */
+  #progress {
+    position: fixed;
+    top: 0; left: 0;
+    height: 3px;
+    background: var(--accent);
+    z-index: 9999;
+    transition: width 0.1s linear;
+    width: 0%;
+  }
+
+  /* ─── NAV ─── */
+  nav {
+    position: sticky;
+    top: 0;
+    background: rgba(250,248,245,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    z-index: 100;
+    padding: 14px 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .nav-brand {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 28px;
+    list-style: none;
+  }
+
+  .nav-links a {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--muted);
+    text-decoration: none;
+    letter-spacing: 0.02em;
+    transition: color 0.15s;
+  }
+
+  .nav-links a:hover { color: var(--ink); }
+
+  /* ─── HERO ─── */
+  .hero {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 80px 48px 64px;
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 64px;
+    align-items: start;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .hero-eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .hero-eyebrow::before {
+    content: '';
+    display: block;
+    width: 24px;
+    height: 2px;
+    background: var(--accent);
+  }
+
+  .hero-title {
+    font-family: 'Fraunces', serif;
+    font-size: 52px;
+    font-weight: 700;
+    line-height: 1.08;
+    letter-spacing: -0.02em;
+    margin-bottom: 20px;
+    color: var(--ink);
+  }
+
+  .hero-title em {
+    font-style: italic;
+    font-weight: 300;
+    color: var(--muted);
+  }
+
+  .hero-desc {
+    font-size: 17px;
+    color: var(--ink2);
+    line-height: 1.65;
+    max-width: 540px;
+    font-weight: 300;
+  }
+
+  .hero-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding-top: 8px;
+  }
+
+  .meta-block {}
+
+  .meta-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted2);
+    margin-bottom: 4px;
+  }
+
+  .meta-value {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--ink);
+  }
+
+  .meta-value.small { font-size: 13px; font-weight: 400; color: var(--ink2); }
+
+  .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 16px; }
+
+  .tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    padding: 4px 10px;
+    background: var(--tag-bg);
+    border: 1px solid var(--border2);
+    border-radius: 2px;
+    color: var(--muted);
+  }
+
+  /* ─── IMPACT STRIP ─── */
+  .impact-strip {
+    background: var(--ink);
+    color: white;
+    padding: 40px 48px;
+  }
+
+  .impact-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 48px;
+    align-items: center;
+  }
+
+  .impact-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #6e6660;
+    margin-bottom: 8px;
+  }
+
+  .impact-title {
+    font-family: 'Fraunces', serif;
+    font-size: 22px;
+    font-weight: 600;
+    color: white;
+    line-height: 1.2;
+  }
+
+  .impact-metrics {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 32px;
+  }
+
+  .metric {}
+
+  .metric-num {
+    font-family: 'Fraunces', serif;
+    font-size: 36px;
+    font-weight: 700;
+    color: white;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .metric-num span { color: var(--accent); }
+
+  .metric-desc {
+    font-size: 12px;
+    color: #8a8178;
+    line-height: 1.4;
+  }
+
+  /* ─── MAIN CONTENT ─── */
+  .content {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 48px;
+  }
+
+  /* ─── SECTION ─── */
+  .section {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 48px;
+    padding: 64px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .section:last-child { border-bottom: none; }
+
+  .section-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    color: var(--muted2);
+    text-transform: uppercase;
+    padding-top: 6px;
+    position: sticky;
+    top: 80px;
+    height: fit-content;
+  }
+
+  .section-num strong {
+    display: block;
+    font-family: 'Fraunces', serif;
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--border2);
+    letter-spacing: -0.02em;
+    margin-bottom: 4px;
+  }
+
+  .section-body {}
+
+  .section-title {
+    font-family: 'Fraunces', serif;
+    font-size: 30px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    margin-bottom: 20px;
+    color: var(--ink);
+  }
+
+  .section-title em {
+    font-style: italic;
+    font-weight: 300;
+    color: var(--muted);
+  }
+
+  p {
+    font-size: 15px;
+    line-height: 1.75;
+    color: var(--ink2);
+    margin-bottom: 16px;
+    font-weight: 300;
+  }
+
+  p strong { font-weight: 600; color: var(--ink); }
+
+  p:last-child { margin-bottom: 0; }
+
+  /* ─── CALLOUT ─── */
+  .callout {
+    margin: 28px 0;
+    padding: 20px 24px;
+    border-left: 3px solid var(--accent);
+    background: #fdf1f0;
+    border-radius: 0 4px 4px 0;
+  }
+
+  .callout.amber {
+    border-color: var(--accent-warm);
+    background: #fdf6ee;
+  }
+
+  .callout.green {
+    border-color: var(--accent-green);
+    background: #eef5f1;
+  }
+
+  .callout.blue {
+    border-color: var(--accent-blue);
+    background: #eef2f8;
+  }
+
+  .callout-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+
+  .callout p {
+    font-size: 14px;
+    color: var(--ink);
+    margin-bottom: 0;
+    font-weight: 400;
+  }
+
+  /* ─── PULL QUOTE ─── */
+  .pull-quote {
+    margin: 36px 0;
+    padding: 28px 0;
+    border-top: 2px solid var(--ink);
+    border-bottom: 2px solid var(--ink);
+  }
+
+  .pull-quote p {
+    font-family: 'Fraunces', serif;
+    font-size: 22px;
+    font-weight: 400;
+    font-style: italic;
+    color: var(--ink);
+    line-height: 1.45;
+    margin-bottom: 12px;
+  }
+
+  .pull-quote cite {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-style: normal;
+  }
+
+  /* ─── TWO-COL GRID ─── */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin: 24px 0;
+  }
+
+  .col-block {
+    padding: 20px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+  }
+
+  .col-block-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted2);
+    margin-bottom: 10px;
+  }
+
+  .col-block p { font-size: 13px; margin-bottom: 0; }
+
+  /* ─── LIST ITEMS ─── */
+  .list-items {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin: 20px 0;
+  }
+
+  .list-item {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+  }
+
+  .list-marker {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--tag-bg);
+    border: 1px solid var(--border2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    font-weight: 500;
+    color: var(--muted);
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .list-item p { font-size: 14px; margin-bottom: 0; }
+
+  /* ─── BEFORE/AFTER ─── */
+  .before-after {
+    margin: 28px 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .ba-block { padding: 24px; }
+
+  .ba-before { background: #fdf1f0; }
+  .ba-after { background: #eef5f1; }
+
+  .ba-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    font-weight: 500;
+  }
+
+  .ba-before .ba-label { color: var(--accent); }
+  .ba-after .ba-label { color: var(--accent-green); }
+
+  .ba-block p { font-size: 13px; color: var(--ink2); }
+
+  .ba-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+
+  .ba-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+
+  .ba-text { font-size: 13px; color: var(--ink2); line-height: 1.5; }
+
+  /* ─── TRADEOFF TABLE ─── */
+  .tradeoff-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    font-size: 13px;
+  }
+
+  .tradeoff-table th {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 10px 14px;
+    text-align: left;
+    border-bottom: 2px solid var(--ink);
+    font-weight: 400;
+  }
+
+  .tradeoff-table td {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+    color: var(--ink2);
+    line-height: 1.5;
+  }
+
+  .tradeoff-table tr:last-child td { border-bottom: none; }
+
+  .tradeoff-table tr:hover td { background: var(--tag-bg); }
+
+  .decision {
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  .chosen { color: var(--accent-green); font-weight: 500; font-size: 12px; }
+  .rejected { color: var(--muted2); font-size: 12px; text-decoration: line-through; }
+
+  /* ─── PROCESS TIMELINE ─── */
+  .timeline {
+    position: relative;
+    margin: 28px 0;
+    padding-left: 32px;
+  }
+
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 8px;
+    top: 8px;
+    bottom: 8px;
+    width: 1px;
+    background: var(--border2);
+  }
+
+  .timeline-item {
+    position: relative;
+    margin-bottom: 28px;
+  }
+
+  .timeline-item:last-child { margin-bottom: 0; }
+
+  .timeline-dot {
+    position: absolute;
+    left: -28px;
+    top: 4px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--surface);
+    border: 2px solid var(--border2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .timeline-dot.active { border-color: var(--accent); background: var(--accent); }
+
+  .timeline-week {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted2);
+    margin-bottom: 4px;
+  }
+
+  .timeline-event {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 4px;
+  }
+
+  .timeline-detail {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  /* ─── DESIGN DECISION CARD ─── */
+  .decision-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+    margin: 16px 0;
+  }
+
+  .decision-card-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    background: var(--tag-bg);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .decision-card-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  .decision-card-verdict {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    padding: 3px 8px;
+    border-radius: 2px;
+  }
+
+  .verdict-kept { background: #eef5f1; color: var(--accent-green); }
+  .verdict-dropped { background: #fdf1f0; color: var(--accent); }
+  .verdict-iterated { background: #fdf6ee; color: var(--accent-warm); }
+
+  .decision-card-body {
+    padding: 16px 20px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .dc-col-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted2);
+    margin-bottom: 6px;
+  }
+
+  .decision-card p { font-size: 13px; margin-bottom: 0; }
+
+  /* ─── OUTCOME METRICS ─── */
+  .outcome-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin: 24px 0;
+  }
+
+  .outcome-card {
+    padding: 20px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    border-top: 3px solid var(--accent-blue);
+  }
+
+  .outcome-card.green { border-top-color: var(--accent-green); }
+  .outcome-card.amber { border-top-color: var(--accent-warm); }
+
+  .outcome-num {
+    font-family: 'Fraunces', serif;
+    font-size: 32px;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 4px;
+    color: var(--ink);
+  }
+
+  .outcome-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 4px;
+  }
+
+  .outcome-context {
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.4;
+  }
+
+  /* ─── HORIZONTAL RULE ─── */
+  hr {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 28px 0;
+  }
+
+  /* ─── FOOTER ─── */
+  footer {
+    background: var(--ink);
+    color: #6e6660;
+    padding: 40px 48px;
+    margin-top: 64px;
+  }
+
+  .footer-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .footer-brand {
+    font-family: 'Fraunces', serif;
+    font-size: 18px;
+    font-weight: 600;
+    color: white;
+    margin-bottom: 4px;
+  }
+
+  .footer-sub {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    color: #4a4440;
+  }
+
+  .footer-right {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-align: right;
+    line-height: 1.8;
+  }
+
+  /* ─── INLINE HIGHLIGHT ─── */
+  .hl { background: #fdf6ee; padding: 1px 4px; border-radius: 2px; font-weight: 500; color: var(--ink); }
+  .hl-red { background: #fdf1f0; color: var(--accent); padding: 1px 4px; border-radius: 2px; font-weight: 500; }
+  .hl-green { background: #eef5f1; color: var(--accent-green); padding: 1px 4px; border-radius: 2px; font-weight: 500; }
+
+  /* ─── SCROLL ANIMATIONS ─── */
+  .reveal { opacity: 0; transform: translateY(20px); transition: opacity 0.6s ease, transform 0.6s ease; }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+</style>
+</head>
+<body>
+
+<div id="progress"></div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-brand">UX Case Study — 2026</div>
+  <ul class="nav-links">
+    <li><a href="#problem">Problem</a></li>
+    <li><a href="#research">Research</a></li>
+    <li><a href="#process">Process</a></li>
+    <li><a href="#decisions">Decisions</a></li>
+    <li><a href="#tradeoffs">Tradeoffs</a></li>
+    <li><a href="#outcome">Outcome</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div>
+    <div class="hero-eyebrow">Product Design · Fintech · B2B SaaS</div>
+    <h1 class="hero-title">Global Liquidity<br><em>&amp; Payouts</em><br>Dashboard</h1>
+    <p class="hero-desc">Redesigning how cross-border marketplace sellers understand where their money is stuck — replacing a 14-tab spreadsheet workflow with a single, action-oriented finance operations interface.</p>
+    <div class="tags">
+      <span class="tag">UX Research</span>
+      <span class="tag">Information Architecture</span>
+      <span class="tag">Interaction Design</span>
+      <span class="tag">Finance Ops</span>
+      <span class="tag">EMEA</span>
+      <span class="tag">Enterprise B2B</span>
+      <span class="tag">Cross-border Commerce</span>
+    </div>
+  </div>
+  <div class="hero-meta">
+    <div class="meta-block">
+      <div class="meta-label">My Role</div>
+      <div class="meta-value">Lead Product Designer</div>
+    </div>
+    <div class="meta-block">
+      <div class="meta-label">Team</div>
+      <div class="meta-value small">1 Designer · 2 Engineers · 1 PM · 1 Finance Domain Expert</div>
+    </div>
+    <div class="meta-block">
+      <div class="meta-label">Timeline</div>
+      <div class="meta-value">14 weeks (Discovery → Launch)</div>
+    </div>
+    <div class="meta-block">
+      <div class="meta-label">Platform</div>
+      <div class="meta-value small">Web App (Enterprise, EMEA-focused) · Desktop-first</div>
+    </div>
+    <div class="meta-block">
+      <div class="meta-label">Status</div>
+      <div class="meta-value" style="color:var(--accent-green)">✓ Shipped · Feb 2026</div>
+    </div>
+  </div>
+</div>
+
+<!-- IMPACT STRIP -->
+<div class="impact-strip">
+  <div class="impact-inner">
+    <div>
+      <div class="impact-label">Measurable Impact</div>
+      <div class="impact-title">What shipped actually changed</div>
+    </div>
+    <div class="impact-metrics">
+      <div class="metric">
+        <div class="metric-num">73<span>%</span></div>
+        <div class="metric-desc">Reduction in time-to-identify a blocked payment</div>
+      </div>
+      <div class="metric">
+        <div class="metric-num">2.4<span>×</span></div>
+        <div class="metric-desc">Faster payout initiation vs. prior spreadsheet workflow</div>
+      </div>
+      <div class="metric">
+        <div class="metric-num">91<span>%</span></div>
+        <div class="metric-desc">Task completion rate on first visit (usability testing, n=12)</div>
+      </div>
+      <div class="metric">
+        <div class="metric-num">0</div>
+        <div class="metric-desc">Support tickets for "where is my money" in first 30 days post-launch</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CONTENT -->
+<div class="content">
+
+  <!-- 01 · PROBLEM -->
+  <div class="section reveal" id="problem">
+    <div class="section-num">
+      <strong>01</strong>
+      Problem
+    </div>
+    <div class="section-body">
+      <h2 class="section-title">Finance teams didn't know <em>where their money was</em></h2>
+
+      <p>Enterprise sellers operating across EMEA markets — managing inventory in Germany, payouts to UK suppliers, and VAT obligations in France — had no unified view of their liquidity position. Every Friday, a finance manager at a mid-size marketplace would spend 2–3 hours manually reconciling <strong>five separate tools</strong>: a logistics platform, a bank portal, a VAT compliance SaaS, a currency exchange spreadsheet, and an internal order management system.</p>
+
+      <div class="callout">
+        <div class="callout-label">The Core Problem Statement</div>
+        <p><strong>"I have money somewhere in the system. I don't know if it's stuck in customs, held by the bank, or waiting on a VAT reclaim. I only find out when something breaks — a supplier payment fails, a penalty arrives, or a shipment is delayed."</strong></p>
+      </div>
+
+      <p>This wasn't a reporting problem. It was a <strong>situational awareness problem</strong>. The data existed — it was fragmented across systems that didn't speak to each other. The finance team was operating blind between reconciliation cycles.</p>
+
+      <p>The cost of not knowing was measurable: penalty fees for overdue VAT filings, shipments sitting at customs for 11+ days because no one had flagged a documentation error, and delayed supplier payments straining relationships with EMEA partners.</p>
+
+      <div class="two-col">
+        <div class="col-block">
+          <div class="col-block-label">Business Impact</div>
+          <p>Late VAT filings, missed payout windows, and customs delays were creating compounding costs estimated at <strong>3–4% of monthly GMV</strong> in avoidable friction.</p>
+        </div>
+        <div class="col-block">
+          <div class="col-block-label">User Impact</div>
+          <p>Finance managers reported <strong>high cognitive load and anxiety</strong> around month-end reconciliation. "I go into it knowing something will be wrong — I just don't know what."</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 02 · RESEARCH -->
+  <div class="section reveal" id="research">
+    <div class="section-num">
+      <strong>02</strong>
+      Research
+    </div>
+    <div class="section-body">
+      <h2 class="section-title">Understanding the <em>actual workflow</em></h2>
+
+      <p>Before designing anything, I spent two weeks in discovery — conducting contextual interviews and workflow shadowing with 8 finance professionals across 4 EMEA-focused marketplace businesses (2 SME, 2 mid-market). The goal was not to validate a solution but to understand the <em>mental model</em> of cross-border money management.</p>
+
+      <div class="timeline">
+        <div class="timeline-item">
+          <div class="timeline-dot active"></div>
+          <div class="timeline-week">Week 1–2</div>
+          <div class="timeline-event">Contextual Interviews & Workflow Shadowing</div>
+          <div class="timeline-detail">8 participants · 90-min sessions · Recorded screen sessions during reconciliation cycles. Key method: "Show me the last time money was stuck — walk me through exactly what you did."</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-week">Week 2–3</div>
+          <div class="timeline-event">Affinity Mapping & Jobs-to-be-Done Framework</div>
+          <div class="timeline-detail">Synthesised 340 data points into 6 primary jobs. Identified 3 critical jobs that weren't being served: real-time block visibility, root-cause attribution, and urgency ranking.</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-week">Week 3</div>
+          <div class="timeline-event">Competitive Audit</div>
+          <div class="timeline-detail">Reviewed 6 tools: Airwallex, Wise Business, Payoneer, Netsuite, Stripe Treasury, Brex. None solved the cross-system aggregation problem. All optimised for the transaction layer, not the operational awareness layer.</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-week">Week 3–4</div>
+          <div class="timeline-event">Domain Expert Sessions</div>
+          <div class="timeline-detail">3 sessions with a VAT compliance specialist and 2 EMEA logistics operations leads. Critical learning: <strong>customs holds and tax delays follow predictable patterns</strong> — they're not random, they're navigable if surfaced early.</div>
+        </div>
+      </div>
+
+      <div class="pull-quote">
+        <p>"The problem isn't that the data doesn't exist. The problem is that by the time I've found it, it's too late to act on it without a scramble."</p>
+        <cite>— Finance Manager, mid-market EMEA marketplace, Interview #4</cite>
+      </div>
+
+      <p>The most significant research finding was about <strong>mental model mismatch</strong>. Finance managers didn't think about their money in terms of currencies or accounts. They thought about it in terms of <em>states</em>: money that was safe, money that was moving, and money that was stuck. Every existing tool was organized by transaction type. The mental model was organized by urgency and control.</p>
+
+      <div class="callout blue">
+        <div class="callout-label">Critical Research Insight</div>
+        <p>Users had developed an informal triage system — Post-it notes on monitors, a "red tab" in their spreadsheet, a weekly Slack message to logistics. They were <strong>manually building the dashboard that didn't exist</strong>. Our job was to make that invisible system visible.</p>
+      </div>
+
+      <h3 style="font-size:16px;font-weight:600;margin:24px 0 12px;color:var(--ink)">Key Jobs-to-be-Done Identified</h3>
+
+      <div class="list-items">
+        <div class="list-item">
+          <div class="list-marker">J1</div>
+          <div><p><strong>Know immediately if something needs my attention today</strong> — without running a reconciliation. The "first 60 seconds of the day" job.</p></div>
+        </div>
+        <div class="list-item">
+          <div class="list-marker">J2</div>
+          <div><p><strong>Understand why money is stuck</strong>, not just that it is. The root cause, so I can take the right action (call customs, chase the bank, escalate VAT).</p></div>
+        </div>
+        <div class="list-item">
+          <div class="list-marker">J3</div>
+          <div><p><strong>Know how much is actually available to deploy</strong> right now — across all currencies — without needing to convert and sum manually.</p></div>
+        </div>
+        <div class="list-item">
+          <div class="list-marker">J4</div>
+          <div><p><strong>Initiate or approve a payout</strong> with confidence that it won't fail due to a compliance issue I didn't know about.</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 03 · PROCESS -->
+  <div class="section reveal" id="process">
+    <div class="section-num">
+      <strong>03</strong>
+      Design Process
+    </div>
+    <div class="section-body">
+      <h2 class="section-title">From 14 tabs<br><em>to one question</em></h2>
+
+      <p>The design process was non-linear but followed a clear principle: <strong>every screen should answer one question first</strong>. In this case, that question was: <em>"Where is my money stuck right now?"</em> Everything else — currency breakdowns, shipment details, tax compliance — existed in service of that question, not alongside it.</p>
+
+      <div class="timeline">
+        <div class="timeline-item">
+          <div class="timeline-dot active"></div>
+          <div class="timeline-week">Week 4–5</div>
+          <div class="timeline-event">Information Architecture & Concept Framing</div>
+          <div class="timeline-detail">Tested 3 organizational models with 4 users: (1) By currency, (2) By transaction status, (3) By urgency/action required. Model 3 won unanimously — users recognized their own mental model immediately. "This is exactly how I think about it."</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot active"></div>
+          <div class="timeline-week">Week 5–6</div>
+          <div class="timeline-event">Low-Fidelity Wireframes (3 Concepts)</div>
+          <div class="timeline-detail">Explored: dashboard-style overview, linear ledger view, and the three-state triage layout (Blocked / Pending / Available). Rapid paper prototyping first, then Figma lo-fi. The three-state concept reduced cognitive load significantly in think-aloud sessions.</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot active"></div>
+          <div class="timeline-week">Week 7–9</div>
+          <div class="timeline-event">Mid-Fidelity Prototype & Usability Testing (Round 1)</div>
+          <div class="timeline-detail">6 participants. Tested: time-to-identify most urgent block, ability to trace root cause, confidence in "Available" total. Found: users were uncertain about the distinction between Pending and Blocked — collapsed into a single "action required" vs "no action needed" model in next iteration.</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot active"></div>
+          <div class="timeline-week">Week 10–11</div>
+          <div class="timeline-event">High-Fidelity Design & Second Usability Round</div>
+          <div class="timeline-detail">Refined the alert banner, introduced the "% of float blocked" KPI as an escalation threshold, added per-shipment "days stuck" column after users specifically asked "how long has this been sitting?". Second round: 6 new participants, 91% task completion.</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot active"></div>
+          <div class="timeline-week">Week 12–14</div>
+          <div class="timeline-event">Engineering Handoff, QA, & Launch</div>
+          <div class="timeline-detail">Built a component-level Figma library with documented states. Ran 2 QA cycles. Shipped to EMEA enterprise beta users (14 accounts) on Feb 10, 2026. Full release Feb 24, 2026.</div>
+        </div>
+      </div>
+
+      <div class="callout amber">
+        <div class="callout-label">Pivotal Design Moment</div>
+        <p>In Round 1 testing, a user looked at the "Pending" column and said <em>"Okay but what do I actually do with that?"</em> — the answer was "nothing right now." That insight led to the core IA reframe: the primary split isn't Blocked / Pending / Available, it's <strong>Act Now / Will Clear / Safe to Use</strong>. The labels changed, but more importantly the hierarchy changed — Blocked got a persistent alert banner above the fold.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 04 · DESIGN DECISIONS -->
+  <div class="section reveal" id="decisions">
+    <div class="section-num">
+      <strong>04</strong>
+      Design Decisions
+    </div>
+    <div class="section-body">
+      <h2 class="section-title">What we chose,<br><em>and why</em></h2>
+
+      <p>Each major design decision was contested, tested, and deliberate. The following captures the decisions that most shaped the final product — including the ones that were iterated or dropped.</p>
+
+      <div class="decision-card">
+        <div class="decision-card-head">
+          <div class="decision-card-title">Decision 1 — Three-state triage layout vs. multi-tab dashboard</div>
+          <div class="decision-card-verdict verdict-kept">KEPT</div>
+        </div>
+        <div class="decision-card-body">
+          <div>
+            <div class="dc-col-label">The decision</div>
+            <p>Organize the primary view around three money states — Blocked, Pending, Available — displayed in a single horizontal triptych, not a tab-nav dashboard with separate pages per category.</p>
+          </div>
+          <div>
+            <div class="dc-col-label">Why it was right</div>
+            <p>Users needed spatial comparison, not navigation. Seeing all three states simultaneously made the <em>proportion</em> legible — 30% blocked immediately felt different from 5% blocked. Tabs would have hidden this ratio, requiring mental arithmetic.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="decision-card">
+        <div class="decision-card-head">
+          <div class="decision-card-title">Decision 2 — Persistent alert banner above the fold</div>
+          <div class="decision-card-verdict verdict-kept">KEPT</div>
+        </div>
+        <div class="decision-card-body">
+          <div>
+            <div class="dc-col-label">The decision</div>
+            <p>A non-dismissable alert banner that names the specific blocked issues, total exposure, and a hard deadline — appears on every load when blocked items exist.</p>
+          </div>
+          <div>
+            <div class="dc-col-label">Why it was right</div>
+            <p>Finance managers open this dashboard during morning stand-up or EOD review. They need to know in 5 seconds if there's a fire. The banner makes it impossible to miss. Dismissable banners were tested — users dismissed them and then forgot the issue existed.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="decision-card">
+        <div class="decision-card-head">
+          <div class="decision-card-title">Decision 3 — "% of float blocked" as primary KPI</div>
+          <div class="decision-card-verdict verdict-iterated">ITERATED</div>
+        </div>
+        <div class="decision-card-body">
+          <div>
+            <div class="dc-col-label">Original approach</div>
+            <p>Show the raw dollar value of blocked funds. Engineering team's initial instinct: "just show the number, it's clearest."</p>
+          </div>
+          <div>
+            <div class="dc-col-label">Why we changed it</div>
+            <p>$9,840 blocked feels different for a $50k business vs. a $500k business. The percentage — with a visible threshold (target: &lt;10%) — gave context and created a shared team benchmark. Users responded to the threshold: <em>"Oh, 30% — that's clearly a problem."</em></p>
+          </div>
+        </div>
+      </div>
+
+      <div class="decision-card">
+        <div class="decision-card-head">
+          <div class="decision-card-title">Decision 4 — Light editorial theme for an enterprise finance tool</div>
+          <div class="decision-card-verdict verdict-kept">KEPT</div>
+        </div>
+        <div class="decision-card-body">
+          <div>
+            <div class="dc-col-label">The design choice</div>
+            <p>Warm off-white backgrounds, serif typography for headings, monospace for all financial figures. Deliberately not dark mode — not a "terminal." Not blue/corporate. Legible, trustworthy, serious.</p>
+          </div>
+          <div>
+            <div class="dc-col-label">The rationale</div>
+            <p>Enterprise finance tools default to navy, grey, and dense grids. This created a visual language of clarity and precision — the same qualities finance users bring to their work. The serif typography signalled permanence and authority; monospace for figures ensured column alignment and digit legibility.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="decision-card">
+        <div class="decision-card-head">
+          <div class="decision-card-title">Decision 5 — "Days stuck" column in shipment table</div>
+          <div class="decision-card-verdict verdict-kept">KEPT</div>
+        </div>
+        <div class="decision-card-body">
+          <div>
+            <div class="dc-col-label">Origin</div>
+            <p>Not in the original design. Added after a user in testing said: "I need to know how long this has been sitting — that tells me if it's becoming a real problem or just processing."</p>
+          </div>
+          <div>
+            <div class="dc-col-label">Why it earned its column</div>
+            <p>Duration is how finance teams triage escalation. 1 day in customs is normal; 11 days means document dispute. The column created an implicit urgency ranking without requiring a separate sort/filter action. Color-coded: red for &gt;7 days, amber for 3–6, grey for normal.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 05 · TRADEOFFS -->
+  <div class="section reveal" id="tradeoffs">
+    <div class="section-num">
+      <strong>05</strong>
+      Tradeoffs
+    </div>
+    <div class="section-body">
+      <h2 class="section-title">What we gave up,<br><em>and what we protected</em></h2>
+
+      <p>Good product design requires explicit tradeoffs — choices to <em>not</em> do something in order to do something else exceptionally well. These were the hardest calls on this project.</p>
+
+      <table class="tradeoff-table">
+        <thead>
+          <tr>
+            <th>Tradeoff Area</th>
+            <th>What We Could Have Done</th>
+            <th>What We Chose</th>
+            <th>The Reasoning</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="decision">Scope</td>
+            <td class="rejected">All 14 currency markets, full global view</td>
+            <td class="chosen">3 currencies, 1 region (EMEA)</td>
+            <td>Breadth would have made the IA unmanageable and delayed launch by 3+ months. EMEA was the highest-pain market. Solving one region excellently builds the pattern for others.</td>
+          </tr>
+          <tr>
+            <td class="decision">Chart / Visualization</td>
+            <td class="rejected">Revenue trend charts, historical graphs, sparklines</td>
+            <td class="chosen">No historical charts in v1</td>
+            <td>Charts answer "how did we get here?" — not "what do I do right now?" Every pixel of real estate was allocated to the operational present, not the analytical past. Charts are v2.</td>
+          </tr>
+          <tr>
+            <td class="decision">Currency Conversion</td>
+            <td class="rejected">Live FX rates with conversion toggle</td>
+            <td class="chosen">Static approximate USD equivalents</td>
+            <td>Live FX APIs added integration complexity and latency risk. Finance teams don't make conversion decisions from a dashboard — they use treasury tools. Approximate equivalents served the "rough total" mental model without false precision.</td>
+          </tr>
+          <tr>
+            <td class="decision">Notification System</td>
+            <td class="rejected">Email/Slack alerts for new holds or blocks</td>
+            <td class="chosen">In-product only (persistent banner)</td>
+            <td>Push notifications require notification preferences, unsubscribe flows, and delivery infrastructure. The highest-value moment was the dashboard itself — designing the alert <em>within</em> the product ensured it was seen in context, when the user could act on it.</td>
+          </tr>
+          <tr>
+            <td class="decision">Mobile</td>
+            <td class="rejected">Responsive mobile layout</td>
+            <td class="chosen">Desktop-first only (v1)</td>
+            <td>Research showed 94% of reconciliation tasks were performed at a desk. Enterprise finance work requires table density and multi-column views that compress poorly on mobile. Mobile is a meaningful v2 investment — but not at the cost of desktop density and clarity.</td>
+          </tr>
+          <tr>
+            <td class="decision">Tax Filing UI</td>
+            <td class="rejected">In-product VAT filing wizard</td>
+            <td class="chosen">Status visibility only (link to external tool)</td>
+            <td>VAT filing is a deep, regulation-specific workflow. Building it correctly would have required a separate 6-month project. Showing the <em>status and urgency</em> of filings — and surfacing when they were overdue — was the actual problem. Linking to the specialist tool was the right seam.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="callout green">
+        <div class="callout-label">Design Philosophy Behind These Tradeoffs</div>
+        <p>The product manager pushed hard for the global 14-currency view in v1. The argument: "our biggest accounts need it." My counter: <strong>a product that does one thing perfectly builds more trust than a product that does many things adequately.</strong> Shipping a focused, coherent v1 gave us the user credibility to earn the scope expansion in v2.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 06 · BEFORE / AFTER -->
+  <div class="section reveal">
+    <div class="section-num">
+      <strong>06</strong>
+      Before &amp; After
+    </div>
+    <div class="section-body">
+      <h2 class="section-title">The workflow<br><em>that changed</em></h2>
+
+      <p>The clearest measure of design impact is the before/after comparison of how a user completes their core job. For this finance team, that job was the Monday morning liquidity check — the first task every week.</p>
+
+      <div class="before-after">
+        <div class="ba-block ba-before">
+          <div class="ba-label">BEFORE — Monday Morning Workflow</div>
+          <div class="ba-row"><div class="ba-icon">⏱</div><div class="ba-text"><strong>~110 minutes total</strong> to complete full liquidity review</div></div>
+          <div class="ba-row"><div class="ba-icon">📋</div><div class="ba-text">Open logistics portal → export last 7 days → paste into master spreadsheet (Tab 3)</div></div>
+          <div class="ba-row"><div class="ba-icon">📋</div><div class="ba-text">Log into bank portal for each of 3 currencies → check pending holds → manual note in spreadsheet</div></div>
+          <div class="ba-row"><div class="ba-icon">📋</div><div class="ba-text">Check VAT compliance SaaS → note outstanding filings → cross-reference with payment calendar</div></div>
+          <div class="ba-row"><div class="ba-icon">📋</div><div class="ba-text">Sum USD equivalents manually (approximate FX from Google)</div></div>
+          <div class="ba-row"><div class="ba-icon">⚠️</div><div class="ba-text">Discover 2 customs holds and an overdue VAT reclaim — 11 days after they started</div></div>
+          <div class="ba-row"><div class="ba-icon">📧</div><div class="ba-text">Send manual status summary to finance lead via email</div></div>
+        </div>
+        <div class="ba-block ba-after">
+          <div class="ba-label">AFTER — Monday Morning Workflow</div>
+          <div class="ba-row"><div class="ba-icon">⏱</div><div class="ba-text"><strong>~12 minutes total</strong> including payout approval actions</div></div>
+          <div class="ba-row"><div class="ba-icon">✓</div><div class="ba-text">Open dashboard → alert banner surfaces 2 customs holds + overdue VAT in 5 seconds</div></div>
+          <div class="ba-row"><div class="ba-icon">✓</div><div class="ba-text">Three-state view shows $9,840 blocked (30.6% of float) — immediately above threshold</div></div>
+          <div class="ba-row"><div class="ba-icon">✓</div><div class="ba-text">Shipment table shows #ORD-4481 has been held 11 days — escalate to customs broker</div></div>
+          <div class="ba-row"><div class="ba-icon">✓</div><div class="ba-text">Currency wallets show $33,540 available — confirm payout to Nordic Supply can proceed</div></div>
+          <div class="ba-row"><div class="ba-icon">✓</div><div class="ba-text">Review &amp; approve 3 pending payouts with one action</div></div>
+          <div class="ba-row"><div class="ba-icon">✓</div><div class="ba-text">Share dashboard link to finance lead — no email needed</div></div>
+        </div>
+      </div>
+
+      <p style="margin-top:20px;">The workflow compression wasn't just about speed — it was about <strong>confidence</strong>. Before the redesign, finance managers described the Monday review as stressful: "You know there's something wrong, you just have to find it." After launch, the first user feedback session produced this note unprompted from a participant: <em>"I actually feel like I know what's going on now."</em></p>
+    </div>
+  </div>
+
+  <!-- 07 · OUTCOME -->
+  <div class="section reveal" id="outcome">
+    <div class="section-num">
+      <strong>07</strong>
+      Outcome
+    </div>
+    <div class="section-body">
+      <h2 class="section-title">Measurable results<br><em>30 days post-launch</em></h2>
+
+      <p>The dashboard shipped to 14 EMEA enterprise accounts on February 10, 2026, with a full release on February 24. The following metrics were collected from product analytics, support ticket analysis, and a 30-day post-launch survey (n=18 finance team members across 8 accounts).</p>
+
+      <div class="outcome-grid">
+        <div class="outcome-card green">
+          <div class="outcome-num">73%</div>
+          <div class="outcome-label">Reduction in identification time</div>
+          <div class="outcome-context">Average time to identify the most urgent blocked payment dropped from 47 minutes (spreadsheet workflow) to 12 minutes (dashboard). Measured via session recordings + self-reported timing in post-launch survey.</div>
+        </div>
+        <div class="outcome-card green">
+          <div class="outcome-num">2.4×</div>
+          <div class="outcome-label">Faster payout initiation</div>
+          <div class="outcome-context">Time from "decide to pay out" to "payout approved" reduced by 2.4× across tracked accounts. Baseline measured via support ticket timestamps; post-launch via product analytics event tracking.</div>
+        </div>
+        <div class="outcome-card amber">
+          <div class="outcome-num">91%</div>
+          <div class="outcome-label">Usability test task completion</div>
+          <div class="outcome-context">In formal usability testing (n=12, unmoderated via Maze), 91% of participants completed the 3 core tasks without assistance or backtracking on first use. Prior tool averaged 61%.</div>
+        </div>
+        <div class="outcome-card">
+          <div class="outcome-num">0</div>
+          <div class="outcome-label">"Where is my money" support tickets</div>
+          <div class="outcome-context">The highest-volume support ticket category pre-launch. Zero in the first 30 days post-launch across 14 accounts. Not a fluke — users now self-serve the answer in the product.</div>
+        </div>
+        <div class="outcome-card green">
+          <div class="outcome-num">4.4/5</div>
+          <div class="outcome-label">Post-launch satisfaction score</div>
+          <div class="outcome-context">30-day NPS survey of active users (n=18). Top-rated attributes: "clarity of what needs action" (4.7), "trust in the numbers shown" (4.5). Lowest: "currency coverage" (3.6) — confirming v2 priority.</div>
+        </div>
+        <div class="outcome-card amber">
+          <div class="outcome-num">3.6/5</div>
+          <div class="outcome-label">Currency coverage satisfaction</div>
+          <div class="outcome-context">The deliberate v1 scope tradeoff (3 currencies, EMEA only) is the top-rated improvement request. This validates the tradeoff decision — it confirmed demand for expansion without compromising v1 quality.</div>
+        </div>
+      </div>
+
+      <div class="callout green">
+        <div class="callout-label">Unintended Positive Outcome</div>
+        <p>Two accounts reported using the "% of float blocked" threshold (target &lt;10%) as a <strong>weekly KPI in their finance stand-up</strong>. This wasn't designed as a reporting metric — it emerged as a shared language between the finance team and their CFO. A designed artefact becoming an organizational communication tool is a strong signal of product-market fit at the workflow layer.</p>
+      </div>
+
+      <h3 style="font-size:16px;font-weight:600;margin:28px 0 12px;color:var(--ink)">What I'd Do Differently</h3>
+
+      <div class="list-items">
+        <div class="list-item">
+          <div class="list-marker">↻</div>
+          <div><p><strong>Involve engineering earlier in IA exploration.</strong> The three-state layout required a specific data aggregation model that created back-end complexity we didn't anticipate until week 8. Earlier collaboration would have shaped the IA with implementation constraints in mind from week 4.</p></div>
+        </div>
+        <div class="list-item">
+          <div class="list-marker">↻</div>
+          <div><p><strong>Test the alert banner with non-urgent states.</strong> The persistent banner was designed for the "there is a problem" state. We didn't adequately design the "everything is fine" state — the first 3 users who logged in with no blocked funds were momentarily confused by the absence of the banner. A clear "All clear — 0 items blocked" state was needed.</p></div>
+        </div>
+        <div class="list-item">
+          <div class="list-marker">↻</div>
+          <div><p><strong>Commission a proper accessibility audit earlier.</strong> Color coding (red/amber/green) for status was tested with 2 colorblind participants at the end of Round 2. Both relied on the text labels, which were sufficient — but the review should have happened in Round 1 to avoid the risk of a late-stage redesign.</p></div>
+        </div>
+      </div>
+
+      <h3 style="font-size:16px;font-weight:600;margin:28px 0 12px;color:var(--ink)">What's Next (v2 Roadmap)</h3>
+
+      <div class="two-col">
+        <div class="col-block">
+          <div class="col-block-label">Confirmed for v2</div>
+          <p>Multi-currency expansion (6 currencies, 3 regions). Push notifications for new holds. Historical trend view (last 90 days). Mobile-responsive layout for approval workflows on the go.</p>
+        </div>
+        <div class="col-block">
+          <div class="col-block-label">Under Evaluation</div>
+          <p>Predictive hold flagging (ML-based, using historical customs pattern data). VAT filing integration (partnership model). Team roles — read-only analyst view vs. approver view.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div>
+      <div class="footer-brand">Global Liquidity & Payouts</div>
+      <div class="footer-sub">UX Case Study · Shipped Feb 2026 · EMEA Marketplace Finance</div>
+    </div>
+    <div class="footer-right">
+      Lead Product Designer<br>
+      14 weeks · Discovery to Launch<br>
+      Enterprise · B2B SaaS · Fintech
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Progress bar
+  window.addEventListener('scroll', () => {
+    const scrollTop = window.scrollY;
+    const docHeight = document.body.scrollHeight - window.innerHeight;
+    const pct = (scrollTop / docHeight) * 100;
+    document.getElementById('progress').style.width = pct + '%';
+  });
+
+  // Scroll reveal
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.08 });
+
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
